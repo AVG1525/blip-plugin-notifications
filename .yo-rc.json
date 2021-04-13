@@ -1,0 +1,8 @@
+{
+  "generator-blip-plugin": {
+    "promptValues": {
+      "name": "Cesar",
+      "email": "cesar.junior@take.net"
+    }
+  }
+}
