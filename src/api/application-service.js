@@ -52,7 +52,7 @@ const getScheduledMessages = async () => {
             command: {
                 to: 'postmaster@scheduler.msging.net',
                 method: 'get',
-                uri: '/schedules'
+                uri: '/schedules?$skip=0&$take=100&$ascending=false'
             }
         }
     });
@@ -62,4 +62,28 @@ const getScheduledMessages = async () => {
     return items;
 };
 
-export { getApplication, getContacts, getThreads, getScheduledMessages };
+const getNotifications = async (messageId, skip = 0) => {
+    const {
+        response: { items }
+    } = await IframeMessageProxy.sendMessage({
+        action: 'sendCommand',
+        content: {
+            destination: 'MessagingHubService',
+            command: {
+                method: 'get',
+                uri:`/notifications?$skip=${skip}&$take=100&id=${messageId}`
+            }
+        }
+    });
+
+    console.log('#### ITEMS ####');
+    console.log(items);
+    return items;
+};
+export {
+    getApplication,
+    getContacts,
+    getThreads,
+    getScheduledMessages,
+    getNotifications
+};
