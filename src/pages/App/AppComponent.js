@@ -29,12 +29,13 @@ const AppComponent = () => {
     const [notifications, setNotifications] = useState([]);
     const [notificationsAux, setnotificationsAux] = useState([]);
     const [hideList, setHideList] = useState(false);
-    //const [isLoading, setLoading] = useState(true);
+    const [isLoading, setLoading] = useState(false);
 
     const fetchApi = async () => {
+        setLoading(true);
         setApplication(await getApplication());
         setSchedules(await getScheduledMessages());
-
+        setLoading(false);
         showToast({
             type: 'success',
             message: 'Success loaded'
@@ -50,10 +51,12 @@ const AppComponent = () => {
     const title = `Sample Plugin - ${application.shortName}`;
 
     const handleDetalhes = async (messageId) => {
+        setHideList(true);
+        setLoading(true);
         setNotifications(await getNotifications(messageId));
         setnotificationsAux(await getNotifications(messageId));
         localStorage.setItem('messageId', messageId);
-        setHideList(true);
+        setLoading(false);
     };
 
     const backToList = (event) => {
@@ -85,9 +88,12 @@ const AppComponent = () => {
             <div id="main" className="App">
                 <PageHeader title={title} />
                 <PageTemplate title={title}>
+                    {isLoading && <h1>Is Loading</h1>}
                     {!hideList && (
                         <div>
-                            <h3 className="text-center">Notificações agendadas</h3>
+                            <h3 className="text-center">
+                                Notificações agendadas
+                            </h3>
                             <div className="row w-100">
                                 <BlipTable
                                     id_key="name"
@@ -129,7 +135,9 @@ const AppComponent = () => {
                     {hideList && (
                         <div class="row">
                             <div class="col-12">
-                                <h3 className="text-center">Lista de Notificações</h3>
+                                <h3 className="text-center">
+                                    Lista de Notificações
+                                </h3>
                                 <div>
                                     <p>
                                         <a
@@ -166,7 +174,9 @@ const AppComponent = () => {
                                             model={TABLE_MESSAGES_MODEL}
                                             data={notificationsAux.map((s) => ({
                                                 event: s?.event,
-                                                from: s?.from.split('/')[1].split('%')[0]
+                                                from: s?.from
+                                                    .split('/')[1]
+                                                    .split('%')[0]
                                             }))}
                                             empty_message="Nenhum registro encontrado"
                                             can_select={true}
