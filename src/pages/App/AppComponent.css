@@ -1,3 +1,33 @@
+.container-loader {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #ededed;
+    width: 800px;
+    height: 600px;
+}
+
+.loader {
+    max-width: 100%;
+    /* max-width: 15rem; */
+    width: 100%;
+    height: auto;
+    stroke-linecap: round;
+    color: '#3f7de8';
+    font-weight: 'bold';
+}
+
 .text-center {
     text-align: center;
+}
+
+.margin-gl {
+    margin: 1rem;
 }

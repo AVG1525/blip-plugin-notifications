@@ -10,6 +10,7 @@ import { PageHeader } from 'components/PageHeader';
 import { BlipTable } from 'components/BlipTable';
 import { CommonProvider } from 'contexts/CommonContext';
 import { PageTemplate } from 'components/PageTemplate';
+import './AppComponent.css';
 
 const TABLE_SCHEDULES_MODEL = [
     { label: 'Nome', key: 'name' },
@@ -38,7 +39,7 @@ const AppComponent = () => {
         setLoading(false);
         showToast({
             type: 'success',
-            message: 'Success loaded'
+            message: 'Dados carregados'
         });
     };
 
@@ -66,6 +67,9 @@ const AppComponent = () => {
 
     const handleSelectEvent = async (event) => {
         let { name, value } = event.target;
+        console.log('value=' + value);
+        console.log('name=' + name);
+        console.log('event.target=' + event.target);
         var mid = localStorage.getItem('messageId');
         if (Object.keys(notifications).length === 0) {
             setNotifications(getNotifications(mid));
@@ -76,7 +80,7 @@ const AppComponent = () => {
             notificationsSelected = notifications;
         } else {
             notificationsSelected = notifications.filter((arr) => {
-                return arr.event === value;
+                return arr.event == value;
             });
         }
 
@@ -85,10 +89,15 @@ const AppComponent = () => {
 
     return (
         <CommonProvider>
-            <div id="main" className="App">
+            <div id="main" className="App text-center">
                 <PageHeader title={title} />
                 <PageTemplate title={title}>
-                    {isLoading && <h1>Is Loading</h1>}
+                    {isLoading && (
+                        <div class="container-loader">
+                            <img src="https://safra.blip.ai/fonts/blip_logo.svg?4d7df62009a68ad9765c504f2c70ba68" />
+                            <h3 className="text-center">Loading...</h3>
+                        </div>
+                    )}
                     {!hideList && (
                         <div>
                             <h3 className="text-center">
@@ -118,7 +127,7 @@ const AppComponent = () => {
                                                 >
                                                     {s.name
                                                         ? s.name
-                                                        : 'Ver Notificações'}
+                                                        : 'Visualizar Notificações'}
                                                 </a>
                                             ),
                                             when: s.when,
@@ -139,8 +148,9 @@ const AppComponent = () => {
                                     Lista de Notificações
                                 </h3>
                                 <div>
-                                    <p>
+                                    <p className="margin-gl">
                                         <a
+                                            className="btn btn-info"
                                             style={{
                                                 color: '#3f7de8',
                                                 fontWeight: 'bold'
@@ -151,7 +161,7 @@ const AppComponent = () => {
                                             Voltar
                                         </a>
                                     </p>
-                                    Esolha o tipo de evento:
+                                    Tipo de evento:
                                     <select
                                         id="select-event"
                                         onChange={handleSelectEvent}
