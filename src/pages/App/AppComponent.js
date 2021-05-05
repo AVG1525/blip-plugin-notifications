@@ -11,12 +11,14 @@ import { BlipTable } from 'components/BlipTable';
 import { CommonProvider } from 'contexts/CommonContext';
 import { PageTemplate } from 'components/PageTemplate';
 import './AppComponent.css';
+import Pagination from 'react-js-pagination';
 
 const TABLE_SCHEDULES_MODEL = [
     { label: 'Nome', key: 'name' },
     { label: 'Quando', key: 'when' },
     { label: 'Status', key: 'status' },
-    { label: 'Notification Id', key: 'message' }
+    { label: 'Notification Id', key: 'message'},
+    { label: 'To', key:'to'}
 ];
 
 const TABLE_MESSAGES_MODEL = [
@@ -25,12 +27,31 @@ const TABLE_MESSAGES_MODEL = [
 ];
 
 const AppComponent = () => {
+
+    var regex = new RegExp("\\+?\\(?\\d*\\)? ?\\(?\\d+\\)?\\d*([\\s./-]?\\d{2,})+", "g");
+
     const [application, setApplication] = useState({});
     const [schedules, setSchedules] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [notificationsAux, setnotificationsAux] = useState([]);
     const [hideList, setHideList] = useState(false);
     const [isLoading, setLoading] = useState(false);
+    const [currentPage, setCurrentpage] = useState(1);
+    const [total, setTotal] = useState(0);
+
+    const recordPerpage = 2;
+
+    const pageRange = 10;
+
+    //const totalRecords = 0;
+
+    const handlePageChange = async pageNumber => {
+        setCurrentpage(pageNumber);
+        var pgnb = pageNumber*recordPerpage;
+        var mid = localStorage.getItem('messageId');
+        setNotifications(await getNotifications(mid, pgnb, 0, recordPerpage));
+        setnotificationsAux(await getNotifications(mid, pgnb, 0, recordPerpage));
+    }
 
     const fetchApi = async () => {
         setLoading(true);
@@ -52,11 +73,15 @@ const AppComponent = () => {
     const title = `Sample Plugin - ${application.shortName}`;
 
     const handleDetalhes = async (messageId) => {
+        console.log('messageId= ' + messageId);
+        localStorage.setItem('messageId', messageId);
         setHideList(true);
         setLoading(true);
-        setNotifications(await getNotifications(messageId));
-        setnotificationsAux(await getNotifications(messageId));
-        localStorage.setItem('messageId', messageId);
+        setNotifications(await getNotifications(messageId, 0, 0, recordPerpage));
+        setnotificationsAux(await getNotifications(messageId, 0, 0, recordPerpage));
+        setTotal(localStorage.getItem('total'));
+        // setTotal(await getNotifications(messageId, 0, 0, 1));
+        // console.log('total = ' + total);
         setLoading(false);
     };
 
@@ -67,9 +92,6 @@ const AppComponent = () => {
 
     const handleSelectEvent = async (event) => {
         let { name, value } = event.target;
-        console.log('value=' + value);
-        console.log('name=' + name);
-        console.log('event.target=' + event.target);
         var mid = localStorage.getItem('messageId');
         if (Object.keys(notifications).length === 0) {
             setNotifications(getNotifications(mid));
@@ -93,7 +115,7 @@ const AppComponent = () => {
                 <PageHeader title={title} />
                 <PageTemplate title={title}>
                     {isLoading && (
-                        <div class="container-loader">
+                        <div className="container-loader">
                             <img src="https://safra.blip.ai/fonts/blip_logo.svg?4d7df62009a68ad9765c504f2c70ba68" />
                             <h3 className="text-center">Loading...</h3>
                         </div>
@@ -132,7 +154,8 @@ const AppComponent = () => {
                                             ),
                                             when: s.when,
                                             status: s.status,
-                                            message: s.message.id
+                                            message: s.message.id,
+                                            to: s.message.to
                                         }))}
                                     can_select={true}
                                     body_height="400px"
@@ -170,7 +193,9 @@ const AppComponent = () => {
                                         <option value="accepted">
                                             accepted
                                         </option>
-                                        <option value="Java">received</option>
+                                        <option value="received">
+                                            received
+                                        </option>
                                         <option value="consumed">
                                             consumed
                                         </option>
@@ -193,6 +218,16 @@ const AppComponent = () => {
                                             body_height="400px"
                                             selected_items={[]}
                                         />
+                                        <Pagination 
+                                        itemClass="page-item"
+                                        linkClass="page-link"
+                                        activePage={currentPage} 
+                                        itemsCountPerPage={recordPerpage} 
+                                        totalItemsCount={total} 
+                                        pageRangeDisplayed={pageRange} 
+                                        onChange={handlePageChange}
+                                         />
+                                         {total} Registros
                                     </div>
                                 </div>
                             </div>

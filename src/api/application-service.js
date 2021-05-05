@@ -62,24 +62,27 @@ const getScheduledMessages = async () => {
     return items;
 };
 
-const getNotifications = async (messageId, skip = 0) => {
+const getNotifications = async (messageId, skip = 0, tipo = 0, take = 100) => {
     const {
-        response: { items }
+        response: { items, total }
     } = await IframeMessageProxy.sendMessage({
         action: 'sendCommand',
         content: {
             destination: 'MessagingHubService',
             command: {
                 method: 'get',
-                uri:`/notifications?$skip=${skip}&$take=100&id=${messageId}`
+                uri: `/notifications?$skip=${skip}&$take=${take}&id=${messageId}`
             }
         }
     });
 
     console.log('#### ITEMS ####');
     console.log(items);
-    return items;
+    localStorage.setItem('total', total);
+    if (tipo == 0) return items;
+    else if (tipo == 1) return total;
 };
+
 export {
     getApplication,
     getContacts,
