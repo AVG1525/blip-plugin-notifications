@@ -47,7 +47,11 @@ const AppComponent = () => {
 
     const handlePageChange = async pageNumber => {
         setCurrentpage(pageNumber);
-        var pgnb = pageNumber*recordPerpage;
+        var pgnb = 0;
+        if(pageNumber == 1)
+            pgnb = 0;
+        else
+            pgnb = pageNumber*recordPerpage;
         var mid = localStorage.getItem('messageId');
         setNotifications(await getNotifications(mid, pgnb, 0, recordPerpage));
         setnotificationsAux(await getNotifications(mid, pgnb, 0, recordPerpage));
@@ -80,8 +84,6 @@ const AppComponent = () => {
         setNotifications(await getNotifications(messageId, 0, 0, recordPerpage));
         setnotificationsAux(await getNotifications(messageId, 0, 0, recordPerpage));
         setTotal(localStorage.getItem('total'));
-        // setTotal(await getNotifications(messageId, 0, 0, 1));
-        // console.log('total = ' + total);
         setLoading(false);
     };
 
@@ -105,8 +107,8 @@ const AppComponent = () => {
                 return arr.event == value;
             });
         }
-
-        setnotificationsAux(notificationsSelected);
+        //setTotal(notifications.length);
+        setnotificationsAux(notificationsSelected.length);
     };
 
     return (
