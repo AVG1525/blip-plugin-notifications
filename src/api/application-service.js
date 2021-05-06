@@ -57,9 +57,9 @@ const getScheduledMessages = async () => {
         }
     });
 
-    //console.log('#### ITEMS ####');
+    //console.log('#### ITEMS SCHEDULE ####');
     //console.log(items);
-    return items;
+    return filterValues(items, filterByBroadcast);
 };
 
 const getNotifications = async (messageId, skip = 0, tipo = 0, take = 100) => {
@@ -76,13 +76,25 @@ const getNotifications = async (messageId, skip = 0, tipo = 0, take = 100) => {
         }
     });
 
-    //console.log('#### ITEMS ####');
+    //console.log('#### ITEMS NOTIFICATIONS ####');
     //console.log(items);
-    //localStorage.setItem('total', total);
-    // debugger;
-    if (tipo == 0) return items;
+    if (tipo == 0) return filterValues(items, filterByPhone);
     else if (tipo == 1) return total;
 };
+
+const filterByBroadcast = (schedule) => {
+    const MESSAGE_BROADCAST = "wpp"
+    return schedule.message.to.toLowerCase().includes(MESSAGE_BROADCAST);
+}
+
+const filterByPhone = (phone) => {
+    const REGEX_EXPRESSION = new RegExp("\\+?\\(?\\d*\\)? ?\\(?\\d+\\)?\\d*([\\s./-]?\\d{2,})+", "g");
+    return REGEX_EXPRESSION.test(phone.from);
+}
+
+const filterValues = (values, condition) => {
+    return values.filter(condition);
+}
 
 export {
     getApplication,
