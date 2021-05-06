@@ -57,8 +57,8 @@ const getScheduledMessages = async () => {
         }
     });
 
-    console.log('#### ITEMS ####');
-    console.log(items);
+    //console.log('#### ITEMS ####');
+    //console.log(items);
     return items;
 };
 
@@ -76,9 +76,10 @@ const getNotifications = async (messageId, skip = 0, tipo = 0, take = 100) => {
         }
     });
 
-    console.log('#### ITEMS ####');
-    console.log(items);
-    localStorage.setItem('total', total);
+    //console.log('#### ITEMS ####');
+    //console.log(items);
+    //localStorage.setItem('total', total);
+    // debugger;
     if (tipo == 0) return items;
     else if (tipo == 1) return total;
 };

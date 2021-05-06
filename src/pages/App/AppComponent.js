@@ -32,29 +32,49 @@ const AppComponent = () => {
 
     const [application, setApplication] = useState({});
     const [schedules, setSchedules] = useState([]);
-    const [notifications, setNotifications] = useState([]);
+    //const [notifications, setNotifications] = useState([]);
     const [notificationsAux, setnotificationsAux] = useState([]);
+
+    const [allNotifications, setAllNotifications] = useState([]);
+    //const [totalNotifications, setTotalNotifications] = useState([]);
+    //const [eventFilter, setEventFilter] = useState(String);
+    const [notificationsFilted, setNotificationsFilted] = useState([]);
+    //const [messageId, setMessageId] = useState(String);
+
     const [hideList, setHideList] = useState(false);
     const [isLoading, setLoading] = useState(false);
     const [currentPage, setCurrentpage] = useState(1);
     const [total, setTotal] = useState(0);
 
-    const recordPerpage = 2;
+    const recordPerpage = 10;//10; //2
 
     const pageRange = 10;
 
     //const totalRecords = 0;
 
-    const handlePageChange = async pageNumber => {
+    const handlePageChange = async (pageNumber, testFilter) => {
         setCurrentpage(pageNumber);
-        var pgnb = 0;
+        /*var pgnb = 0;
         if(pageNumber == 1)
             pgnb = 0;
         else
-            pgnb = pageNumber*recordPerpage;
-        var mid = localStorage.getItem('messageId');
-        setNotifications(await getNotifications(mid, pgnb, 0, recordPerpage));
-        setnotificationsAux(await getNotifications(mid, pgnb, 0, recordPerpage));
+            pgnb = pageNumber*recordPerpage;*/
+        //var mid = localStorage.getItem('messageId');
+        // debugger;
+        //setNotifications(await getNotifications(mid, pgnb, 0, recordPerpage));
+        //setnotificationsAux(await getNotifications(mid, pgnb, 0, recordPerpage));
+        let testePgn = (pageNumber - 1) * recordPerpage;
+        let number = testePgn + recordPerpage;
+        let teste;
+
+        if (testFilter != undefined) {
+            teste = testFilter.slice(testePgn, number);
+        } else {
+            teste = notificationsFilted.slice(testePgn, number);
+        }
+
+        //setNotifications(teste);
+        setnotificationsAux(teste);
     }
 
     const fetchApi = async () => {
@@ -78,37 +98,79 @@ const AppComponent = () => {
 
     const handleDetalhes = async (messageId) => {
         console.log('messageId= ' + messageId);
-        localStorage.setItem('messageId', messageId);
+        //sessionStorage.setItem('messageId', messageId);
+
         setHideList(true);
         setLoading(true);
-        setNotifications(await getNotifications(messageId, 0, 0, recordPerpage));
-        setnotificationsAux(await getNotifications(messageId, 0, 0, recordPerpage));
-        setTotal(localStorage.getItem('total'));
+
+        await getAllNotifications(messageId);
+
+        let getAllNotificationsTwo = await getNotifications(messageId, 0, 0, recordPerpage);
+
+        //setNotifications(getAllNotificationsTwo);
+        setnotificationsAux(getAllNotificationsTwo);
+
+        //setTotal(localStorage.getItem('total'));
         setLoading(false);
-    };
+    }
 
     const backToList = (event) => {
+        clearUseStates();
         event.preventDefault();
         setHideList(false);
-    };
+    }
+
+    const clearUseStates = () => {
+        setCurrentpage(1);
+    }
+
+    const getAllNotifications = async (messageId) => {
+        const MAXIMUM_NUMBER_OF_NOTIFICATIONS = 100;
+        let totalNotifications = parseInt(await getNotifications(messageId, 0, 1) / MAXIMUM_NUMBER_OF_NOTIFICATIONS);
+        let getAllNotifications = [];
+
+        for (let index = 0; index < (totalNotifications + 1); ++index) {
+            let skipByIndex = MAXIMUM_NUMBER_OF_NOTIFICATIONS * index;
+            let takeByIndex = MAXIMUM_NUMBER_OF_NOTIFICATIONS * (index + 1);
+            let getNotificationsBySkipAndTake = await getNotifications(messageId, skipByIndex, 0, takeByIndex);
+            getAllNotifications.push(...getNotificationsBySkipAndTake);
+        }
+
+        //setTotalNotifications(totalNotifications);
+        setTotal(getAllNotifications.length);
+        setAllNotifications(getAllNotifications);
+        setNotificationsFilted(getAllNotifications);
+    }
 
     const handleSelectEvent = async (event) => {
         let { name, value } = event.target;
+        //setEventFilter(value);
+        /*console.log(`event: ${event}`)
+        console.log(`notiAux: ${notificationsAux}`)
+
         var mid = localStorage.getItem('messageId');
+
         if (Object.keys(notifications).length === 0) {
             setNotifications(getNotifications(mid));
-        }
+        }*/
+
+        //debugger;
 
         let notificationsSelected = '';
         if (value === 'all') {
-            notificationsSelected = notifications;
+            notificationsSelected = allNotifications;
         } else {
-            notificationsSelected = notifications.filter((arr) => {
+            notificationsSelected = allNotifications.filter((arr) => {
                 return arr.event == value;
             });
         }
         //setTotal(notifications.length);
-        setnotificationsAux(notificationsSelected.length);
+        //setnotificationsAux(notificationsSelected.length);
+        setTotal(notificationsSelected.length);
+        setNotificationsFilted(notificationsSelected);
+        setnotificationsAux(notificationsSelected);
+
+        handlePageChange(1, notificationsSelected);
     };
 
     return (
@@ -192,15 +254,9 @@ const AppComponent = () => {
                                         onChange={handleSelectEvent}
                                     >
                                         <option value="all">Todos</option>
-                                        <option value="accepted">
-                                            accepted
-                                        </option>
-                                        <option value="received">
-                                            received
-                                        </option>
-                                        <option value="consumed">
-                                            consumed
-                                        </option>
+                                        <option value="accepted">accepted</option>
+                                        <option value="received">received</option>
+                                        <option value="consumed">consumed</option>
                                         <option value="failed">failed</option>
                                     </select>
                                 </div>
@@ -220,16 +276,16 @@ const AppComponent = () => {
                                             body_height="400px"
                                             selected_items={[]}
                                         />
-                                        <Pagination 
+                                        <Pagination
                                         itemClass="page-item"
                                         linkClass="page-link"
-                                        activePage={currentPage} 
-                                        itemsCountPerPage={recordPerpage} 
-                                        totalItemsCount={total} 
-                                        pageRangeDisplayed={pageRange} 
+                                        activePage={currentPage}
+                                        itemsCountPerPage={recordPerpage}
+                                        totalItemsCount={total}
+                                        pageRangeDisplayed={pageRange}
                                         onChange={handlePageChange}
                                          />
-                                         {total} Registros
+                                         Mostrando {notificationsAux.length} de {total} registro(s).
                                     </div>
                                 </div>
                             </div>
