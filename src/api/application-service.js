@@ -76,8 +76,6 @@ const getNotifications = async (messageId, skip = 0, tipo = 0, take = 100) => {
         }
     });
 
-    //console.log('#### ITEMS NOTIFICATIONS ####');
-    //console.log(items);
     if (tipo == 0) return filterValues(items, filterByPhone);
     else if (tipo == 1) return total;
 };
