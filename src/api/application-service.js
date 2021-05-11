@@ -63,6 +63,9 @@ const getScheduledMessages = async () => {
 };
 
 const getNotifications = async (messageId, skip = 0, tipo = 0, take = 100) => {
+    const IDENTIFIER_RETURN_NOTIFICATIONS = 0;
+    const IDENTIFIER_RETURN_TOTAL_NOTIFICATIONS = 1;
+
     const {
         response: { items, total }
     } = await IframeMessageProxy.sendMessage({
@@ -76,8 +79,8 @@ const getNotifications = async (messageId, skip = 0, tipo = 0, take = 100) => {
         }
     });
 
-    if (tipo == 0) return filterValues(items, filterByPhone);
-    else if (tipo == 1) return total;
+    if (tipo == IDENTIFIER_RETURN_NOTIFICATIONS) return filterValues(items, filterByPhone);
+    else if (tipo == IDENTIFIER_RETURN_TOTAL_NOTIFICATIONS) return total;
 };
 
 const filterByBroadcast = (schedule) => {
