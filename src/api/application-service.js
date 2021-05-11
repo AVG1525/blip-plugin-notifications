@@ -57,12 +57,15 @@ const getScheduledMessages = async () => {
         }
     });
 
-    console.log('#### ITEMS ####');
-    console.log(items);
-    return items;
+    //console.log('#### ITEMS SCHEDULE ####');
+    //console.log(items);
+    return filterValues(items, filterByBroadcast);
 };
 
 const getNotifications = async (messageId, skip = 0, tipo = 0, take = 100) => {
+    const IDENTIFIER_RETURN_NOTIFICATIONS = 0;
+    const IDENTIFIER_RETURN_TOTAL_NOTIFICATIONS = 1;
+
     const {
         response: { items, total }
     } = await IframeMessageProxy.sendMessage({
@@ -76,12 +79,23 @@ const getNotifications = async (messageId, skip = 0, tipo = 0, take = 100) => {
         }
     });
 
-    console.log('#### ITEMS ####');
-    console.log(items);
-    localStorage.setItem('total', total);
-    if (tipo == 0) return items;
-    else if (tipo == 1) return total;
+    if (tipo == IDENTIFIER_RETURN_NOTIFICATIONS) return filterValues(items, filterByPhone);
+    else if (tipo == IDENTIFIER_RETURN_TOTAL_NOTIFICATIONS) return total;
 };
+
+const filterByBroadcast = (schedule) => {
+    const MESSAGE_BROADCAST = "wpp"
+    return schedule.message.to.toLowerCase().includes(MESSAGE_BROADCAST);
+}
+
+const filterByPhone = (phone) => {
+    const REGEX_EXPRESSION = new RegExp("\\+?\\(?\\d*\\)? ?\\(?\\d+\\)?\\d*([\\s./-]?\\d{2,})+", "g");
+    return REGEX_EXPRESSION.test(phone.from);
+}
+
+const filterValues = (values, condition) => {
+    return values.filter(condition);
+}
 
 export {
     getApplication,
